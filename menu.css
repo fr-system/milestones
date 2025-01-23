@@ -1,0 +1,31 @@
+#sidebar-menu{
+    flex-basis:11.5%;
+    background:var( --a-global-color-darkblue);
+    padding:120px 30px 120px 30px;
+}
+nav ul{
+    list-style: none;
+    padding:0;
+}
+.milestones-menu ul li{
+    color: white;
+    padding: 10px; 
+   /* width: 152px;*/
+    height:33px;
+    display:flex;
+    justify-content: flex-start;
+}
+.milestones-menu ul li a{
+    color: white;
+    font-size: 18px;
+    line-height: 26px;
+    text-decoration: none;
+    padding:5px  10px;
+    
+}
+.milestones-menu ul li.current-menu-item{
+    /*width: 152px;*/
+   /* height: 33px;*/
+    background: var(--a-global-color-lightblue);
+    border-radius: 23px;
+}

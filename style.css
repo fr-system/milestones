@@ -1,0 +1,211 @@
+/* 
+Theme Name: Milestones
+Theme URI: https://beta.library.org.il
+Description: A system for managing Yeshiva students' scores
+Author: Agron Team
+
+Version: 1.0.0
+Text Domain: milestones
+*/
+
+:root {
+ 	--a-global-color-darkblue: #031B4E;
+    --a-global-color-lightblue: #1F58F0;
+    --a-global-color-lightgray: #F1F1F2;
+    --a-global-color-gray: #F5F5F5;
+    --a-global-color-azure: #E4F0FF;
+    --a-global-color-text: #000000;
+
+}
+/*@import url('https://fonts.googleapis.com/css2?family=Heebo:wght@100..900&display=swap');*/
+@font-face {
+  font-family: 'Heebo';
+  font-style: normal;
+ /* font-weight: 400;*/
+  src: url(https://beta.library.org.il/wp-content/themes/milestones/assets/fonts/Heebo.woff2) format('woff2');
+}
+
+
+html { margin:0 !important; } 
+body{
+    background:var(--a-global-color-gray);
+    /*display:flex;*/
+    font-family:"Heebo",Arial,sans-serif;
+    font-weight:400;
+    height: 100vh;
+    max-height: 100vh;
+    overflow: auto;
+    margin:0;
+}
+.font-20{
+    font-size: 20px;
+}
+.font-30{
+    font-size: 30px;
+}
+.font-40{
+    font-size: 40px;
+}
+.text-center{
+    text-align: center;
+}
+.text-right{
+    text-align: right;
+}
+.bold{
+    font-weight:700;
+}
+.background-gray{
+    background-color: var(--a-global-color-gray);
+}
+.background-lightblue{
+    background-color: var(--a-global-color-lightblue);
+    color: white;
+}
+.lightblue{
+    color: var(--a-global-color-lightblue);
+}
+.background-darkblue{
+    background-color: var(--a-global-color-darkblue);
+    color: white;
+}
+.darkblue{
+    color:var(--a-global-color-darkblue);
+}
+.border-darkblue{
+    border: 1px solid var(--a-global-color-darkblue);
+    color: var(--a-global-color-darkblue);
+    background-color: transparent;
+}
+.background-azure{
+    background-color: var(--a-global-color-azure);
+    color: var(--a-global-color-lightblue);
+}
+.background-white{
+    background-color: white;
+}
+
+
+.label-for{
+    min-width: max-content;
+    padding: 0 5px 0 20px;
+}
+.padding-sides-25{
+    padding: 0 25px;
+}
+.padding-sides-40{
+    padding: 0 40px;
+}
+.margin-bottom-40{
+    margin-bottom:40px;   
+}
+.margin-bottom-20{
+    margin-bottom: 20px;   
+}
+.box{
+    background-color: white;
+    border-radius: 13px;
+    height: 70px;
+}
+
+/* slider-message */
+.slider-message{
+    display: none;
+    width: 400px;
+    /* height: 400px;*/
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    margin-top: -100px; /* Negative half of height. */
+    margin-left: -200px; /* Negative half of width. */
+    
+    background: #FFFFFF;
+    box-shadow: 0px 1px 26px -2px #0000002E;
+    border-radius: 54px;
+    padding: 30px;
+    text-align: center;
+    z-index: 999
+}
+.slider-message .content{
+    margin-bottom: 50px;
+}
+.slider-message button{
+    margin: 0 5px;
+}
+/*.slider-message i{
+    margin: 15px 0;
+}
+ end slider-message */
+
+/*popup_page_overlay*/
+
+.popup_page_overlay{
+  position: fixed;
+  top: 0px;
+  right: 0px;
+  left: 0px;
+  bottom: 0px;
+  background: rgba(0, 0, 0, .7);
+  text-align: center;
+  opacity: 0;
+  visibility: hidden;
+  z-index: 9999;
+  transition: opacity 0.35s, visibility 0s .35s;
+}
+
+.popup_open .popup_page_overlay{
+  opacity: 1;
+  visibility: visible;
+  transition-delay: 0s;
+  overflow-y: scroll;
+}
+.popup_open .popup{
+  transform: none;
+  -webkit-transform: none;
+  width:50%;
+  height:500px;
+  background-color:var(--a-global-color-darkblue);
+}
+.popup .close-popup{
+    width: 40px;
+    cursor: pointer;
+}
+
+/* login */
+.login-container{
+    background-image: url(/wp-content/themes/milestones/assets/login-background.png);
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    height: 100%;
+    width: 100%;
+    justify-content: center;
+}
+.login-section{
+    width: 30%;
+    height: 60%;
+    min-height: 550px;
+    padding: 10px 50px;
+    text-align: right;
+    border-radius:31px;
+    opacity: 0.90;
+}
+
+.login-section #login_form{
+    width: 100%;
+}
+
+.login-section input{
+    text-align: right;
+     font-size: 18px;
+     height: 60px;
+     border-bottom: 1px solid black;
+     border-radius:0;
+     background-color: transparent;
+}
+
+
+
+
+
+

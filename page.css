@@ -1,0 +1,113 @@
+#main.site-main{flex-basis:85%;max-height:100vh;}
+.page-header{
+    height: 60px;
+}
+.page-header div:not(:last-child){
+    border-left: 1px solid rgba(218, 218, 218, 1);
+}
+.new-row, #sub-table-container{
+    display: none;
+}
+
+.new-row .grid-container{
+    grid-row-gap: 20px;
+    grid-column-gap: 5px;
+}
+
+
+
+.action{
+    font-size: 24px;
+}
+.page-header span{
+    min-width: max-content;
+    margin: 0 20px;
+}
+.current-user-wrapper i:first-child{
+    font-size:30px;
+}
+input[type=search]{
+    border: none;
+    border-bottom: 1px solid black;
+    width: 20vw;
+    outline: none;
+    border-radius: 0;
+}
+.filter-by{
+    margin: 0 55px;
+}
+
+.filter-icon{
+    width: 25px;
+    text-align: center;
+}
+.wrapper-overlay{
+    display: none;
+    z-index: 10002;
+    position: absolute;
+    background-color: white;
+    list-style: none;
+    box-shadow: 1px -1px 12px 7px rgba(0, 0, 0, 0.06);
+    border-radius: 13px;
+    padding: 15px 25px;
+
+}
+.list-filter-by{
+    
+}
+.list-filter-by:before{
+    content:attr(aria-label);
+    font-weight:bold;
+    color:var(--a-global-color-lightblue);
+}
+.list-filter-by li{
+    margin: 5px 0;
+    cursor: pointer;
+}
+
+.list-filter-by li:hover{
+    color:var(--a-global-color-lightblue);
+}
+.label-value{
+    margin-left: 30px;
+}
+.tabs .menu{
+    padding: 0 30px;
+}
+.tabs .tablinks{
+    width: max-content;
+    background-color:var( --a-global-color-darkblue);
+    color: white;
+    border-radius: 13px 13px 0px 0px;
+    padding: 5px 40px;
+    margin: 0 2px;
+    cursor: pointer;
+}    
+.tabs .tablinks.active{
+    background-color:var(--a-global-color-lightblue);
+}
+.tabs  .tabcontent{
+    background-color: white;
+    padding: 20px;
+    height: 35vh;
+}
+
+.wrapper:not(:last-child){
+    border-bottom: 1px solid rgba(218, 218, 218, 1);
+}
+
+.wrapper .clause{
+    padding: 10px;
+}
+.wrapper .clause:not(:last-child){
+        border-left: 1px solid rgba(218, 218, 218, 1);
+}
+.buttons-area button{
+    margin:0 5px;
+}
+
+.search-student{
+    display: none;
+}
+    
+

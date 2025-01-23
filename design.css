@@ -1,0 +1,171 @@
+
+.flex-display{
+    display:flex;
+}
+.flex-display.start{ 
+    align-items: center;
+}
+.flex-display.start{
+    justify-content: flex-start;
+}
+.flex-display.space-between{
+    justify-content: space-between;
+}
+.flex-display.column{
+    flex-direction: column;
+}
+.flex-display.items-center{
+    align-items:center;
+    justify-content: center;
+}
+.flex-display .center{
+    align-self: center;
+}
+.flex-part-20{
+    flex-basis:20%;
+}
+.flex-part-30{
+    flex-basis:30%;
+}
+.flex-part-45{
+    flex-basis:45%;
+}
+.flex-part-50{
+    flex-basis:50%;
+}
+.flex-part-70{
+    flex-basis:70%;
+}
+.grid-container.col-4 {
+    grid-template-columns: repeat(4,1fr);
+    grid-gap: 50px;
+}
+.grid-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-gap: 40px;
+}button,a,select,table{font-family:"Heebo",Arial,sans-serif;}
+button{
+    height:35px;
+    border:solid 1px transparent;
+    color:black;
+    border-radius:50px;
+}
+button,
+[type=submit],
+[type=button] {
+  display: inline-block;
+  font-weight: 400;
+  text-align: center;
+  white-space: nowrap;
+  user-select: none;
+  border: none;
+  font-size: 1rem;
+  transition: all 0.3s;
+  
+}
+button:focus,
+[type=submit]:focus,
+[type=button]:focus {
+  /*outline: 5px auto -webkit-focus-ring-color;*/
+  outline: none;
+}
+button.border-darkblue:focus {
+    background-color: var(--a-global-color-darkblue);
+    color: white;
+}
+button.background-azure:focus {
+    background-color: var(--a-global-color-lightblue);
+    color:var(--a-global-color-azure);;
+}
+button.background-darkblue:focus {
+    background-color: white;
+    color:var(--a-global-color-lightblue);
+}
+
+button:hover,[type=submit]:hover,[type=button]:hover {
+    box-shadow: 2px 2px 7px 0px rgba(0, 0, 0, 0.25);
+}
+
+button:not(:disabled),
+[type=submit]:not(:disabled),
+[type=button]:not(:disabled) {
+  cursor: pointer;
+}
+.button-inner{
+    margin: 1rem;
+}
+.button-inner i,.button-inner span{
+    margin: 4px;
+}
+input, select{
+    height: 30px;
+    padding: 0 10px;
+    border-radius: 10px;
+    outline: none;
+    border-width: 0px;
+}
+
+.table-container{
+    background-color: white;
+    border-radius:13px;
+    height: 60vh;
+    width:100%;
+    padding: 5px;
+    overflow:auto;
+}
+table{
+    border:none;
+    border-style:hidden;
+    border-collapse: collapse;
+    border-spacing: 0;
+    width:100%;
+    font-weight:400;
+}
+table .header-row{
+    color:var(--a-global-color-lightblue);
+    font-weight: 700;
+    font-size: 22px;
+    line-height: 32px;
+    text-align: center;
+    padding:35px;
+    position: sticky;
+    top: 0px;
+}
+table td, table th{
+    background: white !important;
+    border: 2px solid #F0F1F6;
+    padding: 10px;
+    line-height: 1.1;
+    /*vertical-align: top;*/
+    border: 1px solid var(--a-global-color-lightgray);
+    border-left:none;
+    font-style:normal;
+      
+}
+table tbody tr:hover{
+    background:var(--a-global-color-lightgray);
+}
+.table-container table td:last-child,.table-container table th:last-child{
+    border-right:none;
+}
+.table-container table td:not(:last-child), .table-container table th:not(:last-child){
+    width: 10vw;
+}
+.table-container table td:has(.action){
+    border-right:none;
+    border-left:none;
+    width: 2vw;
+}
+.table-container table td.td-checkbox, .table-container table th.td-checkbox{
+    width: 35px;
+    text-align: center;
+}
+.table-container table input[type="checkbox"]{
+    width: 20px;
+    height: 20px;
+    accent-color: var(--a-global-color-darkblue);
+}
+.margin-r-50{
+    margin-right: 50px;
+}

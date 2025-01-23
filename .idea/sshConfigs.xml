@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="SshConfigs">
+    <configs>
+      <sshConfig authType="PASSWORD" host="server.agron.org.il" id="fd98b1f3-d115-4343-9fcb-90bdd84bfce7" port="7777" nameFormat="DESCRIPTIVE" username="library" useOpenSSHConfig="true" />
+    </configs>
+  </component>
+</project>

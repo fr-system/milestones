@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="10a3ed04-6cc2-4824-8742-f2bf8ae12ca1" name="milestones">
+        <fileTransfer rootFolder="/home/library" accessType="SFTP" host="server.agron.org.il" port="7777" sshConfigId="fd98b1f3-d115-4343-9fcb-90bdd84bfce7" sshConfig="library@server.agron.org.il:7777 password">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" keepAliveTimeout="0" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>
