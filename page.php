@@ -49,15 +49,7 @@
                     <tr class="header-row">
                         <th class="bold td-checkbox"><input type="checkbox" class="choose-all-rows" id="all" value="all" name=""></th>
                         <?
-                        $join ="";
-                        $query = "SELECT ";
                         foreach($current["columns"] as $column){
-                            if($column["type"] == "action")continue;
-                            $query .= $column["field"]. ", ";
-                            if(isset($column['join_table'])){
-                                $query .= "wp_y1_".$column['join_table'].".". $column['join_value'].", ";
-                                $join .= " LEFT JOIN wp_y1_".$column['join_table']." ON wp_y1_".$current['table_name'].".".$column["field"] ." = wp_y1_" . $column['join_table'] . ".".$column['join_key'];
-                            }
                             if($column["field"] != $id_column){
                             ?><th class="bold"><?echo $column["title"]??""; ?></th>
                         <?} }?>
@@ -66,10 +58,8 @@
                             <th class="bold"></th><?}?>
                     </tr>
                     </thead>
-                     <?php //   
-                    $query = substr($query,0,-2);
-                    $query .= " FROM  wp_y1_".$current['table_name'];
-                    $query .= $join;
+                     <?php
+                    $query = get_page_query($target);
                     $page_data  = run_query($query);
                     foreach($page_data as $row){
                         echo get_tr_data($target,$row,$id_column);
@@ -86,11 +76,11 @@
                     <?
                     foreach($current["columns"] as $column){
                         if( $column["type"]=="action")continue;
-                        if(!isset($column["hidden"]) || $column["hidden"]!=true ){
+                        if(!isset($column["primary_key"]) || $column["primary_key"]!=true ){
                     ?>
                             <label class="label-for" for="<?echo $column["field"]?>"><?echo $column["title"]?><?echo isset($column["required"])? " *" : "" ?></label>
                             <?if(isset($column["join_table"])|| isset($column["list_name"])){?>
-                                <select name="<?echo $column["field"]?>" value="" <?= isset($column["on_selected"]) ?"onchange='{$column["on_selected"]}()'" :""?>>
+                                <select name="<?echo $column["field"]?>" value="" <?= isset($column["on_selected"]) ?"onchange='{$column["on_selected"]}(this)'" :""?>>
                                     <?  create_combo_options($column);  ?>
                                 </select>
                             <?}
@@ -113,7 +103,7 @@
                     <h3 class="darkblue font-20 bold text-center"><?echo $current['sub_table_title']?></h3>
                 <input type="hidden" name="table_name" value="<?echo $current["sub_table"]?>"/>
                 <? $sub_id_column = array_filter($current["sub_columns"], function ($var) {
-                    return (isset($var['hidden']));
+                    return (isset($var['primary_key']));
                 });
                 $sub_id_column = $sub_id_column[0]["field"];
                 echo get_sub_table($target,$page_data[0]->$id_column);
@@ -189,7 +179,7 @@
             
             var inputs = jQuery(".new-row input:not([type=hidden]) ,.new-row select");
             options.values =jQuery.map(inputs,function(row){return "'" + jQuery(row).val() + "'" });
-            <? $columns = array_filter($current["columns"], function ($var) { return (!isset($var['hidden'])); });?>
+            <? $columns = array_filter($current["columns"], function ($var) { return (!isset($var['primary_key'])); });?>
             var columns ="<? echo implode(",", array_column($columns, 'field') )?>";
             options.columns = columns.split(',');
             options.tableName ="<?echo $current['table_name']?>";
@@ -299,7 +289,22 @@
 
 
         function fillStudentsToTest(a){
-            var b =a;
+            var b =jQuery(a);
+            var v =b.val();
+            get_sub_table_checked_row(v);
+            <?php
+          /*  $sub_columns= array_filter($current["sub_columns"], function ($var) { return (!isset($var['primary_key'])); });
+            $columns_names =  implode(",", array_column($sub_columns, 'field') );
+            //$sql= "insert into wp_y1_{$current["sub_table"]} ({$columns_names}) select ";
+            $sql="select ";
+            $join_column= array_filter($sub_columns, function ($var) { return (isset($var['join_table'])); });
+            $join_column =reset($join_column);
+            //error_log ('joim column '.json_encode ( $join_column));
+            $continue_sql = ",{$join_column['join_key']},100 from wp_y1_{$join_column['join_table']} join wp_y1_{$current["join_to_insert"]["table_name"]} on wp_y1_{$join_column['join_table']}.{$join_column['join_key']} = wp_y1_{$current["join_to_insert"]["table_name"]}.{$current["join_to_insert"]["join_field"]} where {$current["join_to_insert"]["filter_field"]} = ";
+                */?>/*
+            whereValue = jQuery(".new-row select[name='grouping_id']").val();
+            sql = "<?php /*= $sql*/?>" + idValue + "<?php /*= $continue_sql*/?>" + whereValue;
+            ajaxfunction('run_sql', sql,{update_table:'<?php /*=$target*/?>',sub_table_value:idValue});*/
         }
 	</script>
   </section>

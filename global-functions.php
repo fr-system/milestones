@@ -58,13 +58,13 @@ function slider_message(){//<i class="fa-solid fa-circle-exclamation orange" sty
 add_action('wp_ajax_get_sub_table_checked_row', 'get_sub_table_checked_row');
 function get_sub_table_checked_row()
 { 
-    $sub_table= get_sub_table($_POST["page_name"],$_POST["parent_id_value"]);
+    $sub_table= get_sub_table($_POST["page_name"],$_POST["parent_id_value"],$_POST["filter_value"]);
     echo( json_encode($sub_table) );
     die();
 }
-function get_sub_table($page_name,$parent_id_value){ 
+function get_sub_table($page_name,$parent_id_value,$filter_value_to_insert=null){
     global $actions_icons;
-
+    error_log ('parent_id_value '.$parent_id_value." filter_value_to_insert ".$filter_value_to_insert);
     $page_info = STANDART_PAGES[$page_name]; 
     $result='
     <table class="data-grid">
@@ -77,6 +77,8 @@ function get_sub_table($page_name,$parent_id_value){
         $query .= "wp_y1_".$page_info['sub_table'].".".$column["field"]. ", ";
         if(isset($column['join_table'])){
             $query .=($column['no_table_name']?"":  "wp_y1_".$column['join_table']."."). $column['join_value'].", ";
+            if($column['no_table_name'])
+                $column_to_insert = $column['join_value'];
             $join .= " LEFT JOIN wp_y1_".$column['join_table']." ON wp_y1_".$page_info['sub_table'].".".$column["field"] ." = wp_y1_" . $column['join_table'] . ".".$column['join_key'];
         }
         if(!isset($column["hidden"])){
@@ -89,9 +91,26 @@ function get_sub_table($page_name,$parent_id_value){
     }
     $result.='</tr></thead>';
     $query = substr($query,0,-2);
-    $query .= " FROM  wp_y1_".$page_info['sub_table'];
-    $query .= $join;
-    $query .= " WHERE wp_y1_".$page_info['sub_table'].".".$page_info['sub_table_field']." = " .$parent_id_value;
+
+    if(!is_null($filter_value_to_insert)){
+        error_log ("filter_value_to_insert");
+
+        $join_column= array_filter($page_info["sub_columns"], function ($var) { return (isset($var['join_table'])); });
+        $join_column =reset($join_column);
+
+        $query = "SELECT {$column_to_insert},100 as score";
+        $query .= " FROM wp_y1_{$join_column['join_table']} join wp_y1_{$page_info["join_to_insert"]["table_name"]} 
+        on wp_y1_{$join_column['join_table']}.{$join_column['join_key']} = wp_y1_{$page_info["join_to_insert"]["table_name"]}.{$page_info["join_to_insert"]["join_field"]} 
+        where {$page_info["join_to_insert"]["filter_field"]} = ".$filter_value_to_insert;
+    }
+    else {
+        error_log ("parent_id_value");
+        $query .= " FROM  wp_y1_".$page_info['sub_table'];
+        $query .= $join;
+        $query .= " WHERE wp_y1_" . $page_info['sub_table'] . "." . $page_info['sub_table_field'] . " = " . $parent_id_value;
+    }
+
+
     //error_log("query : ".$query);
     $data  = run_query($query); 
     //error_log("data : ".json_encode ($data));
@@ -177,12 +196,12 @@ function get_id_column_in_page($page_name){
 }
 $pages_in_site = array();
     $ar = array();
-    $ar[] = array("field" => "material_id", "type" => "number", "hidden" => true);
+    $ar[] = array("field" => "material_id", "type" => "number", "hidden" => true,"primary_key"=>true);
     $ar[] = array("field" => "material_name", "type" => "text", "title"=>"חומר לימוד");
     $pages_in_site["material"] = array( "table_name"=>"material", "columns" => $ar,"actions"=>array("update","remove") ,"title" =>    "מגמות - חומר לימודי","singular"=>"מגמה","gender"=>2);
     //,"change-grouping","print","update","remove"
     $ar = array();
-    $ar[] = array("field" => "student_code", "type" => "number", "hidden" => true);
+    $ar[] = array("field" => "student_code", "type" => "number", "hidden" => true,"primary_key"=>true);
     $ar[] = array("field" => "student_id", "type" => "text", "title"=>"תעודת זהות");
     $ar[] = array("field" => "last_name", "type" => "text", "title"=>"שם משפחה");
     $ar[] = array("field" => "first_name", "type" => "text", "title"=>"שם פרטי");
@@ -191,13 +210,13 @@ $pages_in_site = array();
     $pages_in_site["students"] = array("table_name"=>"students", "columns" => $ar ,"actions"=>array("correcting-grade"), "title" => "תלמידים", "singular" => "תלמיד");
     
     $ar = array();
-    $ar[] = array("field" => "staff_id", "title"=>"", "type" => "number", "hidden" => true);
+    $ar[] = array("field" => "staff_id", "title"=>"", "type" => "number", "hidden" => true,"primary_key"=>true);
     $ar[] = array("field" => "staff_name", "type" => "text","required" => "true", "title"=>"שם משפחה");
     $ar[] = array("field" => "first_name", "type" => "text", "title"=>"שם פרטי");
     $pages_in_site["staff"] = array("title" => "אנשי צוות", "table_name"=>"staff", "columns" => $ar,"singular"=>"איש צוות","actions"=>array("update","remove"));
     
     $ar = array();
-    $ar[] = array("field" => "group_id", "type" => "number", "hidden" => true);
+    $ar[] = array("field" => "group_id", "type" => "number", "hidden" => true,"primary_key"=>true);
     $ar[] = array("field" => "group_name", "type" => "text", "title"=>"מגמה");
     $ar[] = array("field" => "group_time", "type" => "text","list_name" => "TIME_LIST", "title"=>"סדר");
     $ar[] = array("field" => "material", "type" => "number", "join_table" => "material", "join_key" => "material_id", "join_value" => "material_name", "title"=>"סוג מגמה");
@@ -206,7 +225,7 @@ $pages_in_site = array();
     $pages_in_site["groups"] = array("table_name"=>"grouping", "columns" => $ar,"title" => "קבוצות הלימוד","singular"=>"קבוצת לימוד","gender"=>2);
     
     $ar = array();
-    $ar[] = array("field" => "test_id", "type" => "number", "hidden" => true);
+    $ar[] = array("field" => "test_id", "type" => "number", "hidden" => true,"primary_key"=>true);
     $ar[] = array("field" => "test_material", "type" => "text", "title"=>"הספק");
     $ar[] = array("field" => "test_subject", "type" => "text", "title"=>"מסכת");
     $ar[] = array("field" => "test_order", "type" => "number", "title"=>"סדר המבחנים");

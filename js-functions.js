@@ -1,6 +1,6 @@
 let xhr;
 
-jQuery(document).ready(function(){
+jQuery(document).ready(function($){
     /*jQuery(".menu-list li.current-page").removeClass("current-page");
     var currentPage = window.location.pathname.replaceAll("/","");
     jQuery(".menu-list li."+ currentPage ).addClass("current-page");
@@ -195,7 +195,7 @@ function openPopup(source_button){
     jQuery('html').addClass('popup_open');
 }
 
-function get_sub_table_checked_row(){
+function get_sub_table_checked_row(filterValueToInsert){
         var id_column = jQuery('input[name="id_column"]').val();
 
         jQuery.ajax({
@@ -203,8 +203,10 @@ function get_sub_table_checked_row(){
             method: 'POST',
             url: "/wp-admin/admin-ajax.php",
             data: 
-            {   page_name:jQuery('input[name="page-name"]').val(),
-                parent_id_value: jQuery('.new-row input[name="id_column"]').val(),
+            {
+                page_name:jQuery('input[name="page-name"]').val(),
+                parent_id_value:jQuery('.new-row input[name="id_column"]').val(),
+                filter_value: filterValueToInsert,
                 action: 'get_sub_table_checked_row'
             },
             success: function (output) {
