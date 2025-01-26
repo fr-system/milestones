@@ -51,11 +51,11 @@
                         <?
                         foreach($current["columns"] as $column){
                             if($column["field"] != $id_column){
-                            ?><th class="bold"><?echo $column["title"]??""; ?></th>
+                            ?><th class="bold" name="<?=$column['field']?>"><?echo $column["title"]??""; ?></th>
                         <?} }?>
-                        <th class="bold"></th>
+<!--                        <th class="bold"></th>-->
                         <? if(isset($current["actions"]) && is_array($current["actions"])) {?> 
-                            <th class="bold"></th><?}?>
+                            <th class="bold" name="actions"></th><?}?>
                     </tr>
                     </thead>
                      <?php
@@ -68,7 +68,7 @@
                     ?>
             </table>
             </div>
-            <div class="new-row flex-part-30 margin-r-50">
+            <div class="new-row flex-part-50 margin-r-50">
                 <div class="dark-blue margin-bottom-40 explanation"></div>
                 <div class="grid-container margin-bottom-40">
                     <input type="hidden" name="action" value=""/>
@@ -99,7 +99,7 @@
 
             </div>
             <?if(isset($current["sub_table"])){?>
-                <div class="table-container flex-part-45 margin-r-50" id="sub-table-container">
+                <div class="table-container margin-r-50" id="sub-table-container">
                     <h3 class="darkblue font-20 bold text-center"><?echo $current['sub_table_title']?></h3>
                 <input type="hidden" name="table_name" value="<?echo $current["sub_table"]?>"/>
                 <? $sub_id_column = array_filter($current["sub_columns"], function ($var) {
@@ -123,7 +123,7 @@
                 show_slider_message("aaa",message,"removeRows");
             }
             else if(action == "update" || action == "edit"){
-                showRowDetails("update","<? echo $current["singular"]?>","<? echo isset($current["sub_table"])?>");
+                showRowEditing("update","<? echo $current["singular"]?>","<? echo isset($current["sub_table"])?>");
                 jQuery(".new-row input[name=id_column]").val(row.find("td.td-checkbox input").val());
                 var inputs = jQuery(".new-row input:not([type=hidden]) , .new-row select");
                 var values = jQuery.map(row.find("td:not(.td-checkbox)"),function(td){
@@ -150,8 +150,10 @@
             
         }
         
-        function showRowDetails(action,singular,subTable){
+        function showRowEditing(action,singular,subTable){
             jQuery(".new-row").show();
+            var columns =  jQuery(".central-table th");
+            jQuery(".central-table td:nth-child("+columns.length+"),.central-table th:nth-child("+columns.length+") ").hide();
             if(subTable){
                 jQuery("#sub-table-container").show();
                 jQuery(".search-area").hide();
@@ -172,8 +174,17 @@
             }
             jQuery(".new-row .explanation").text(text1 + singular + " " + text2);
         }
-        
-        
+
+        function hideRowEditing(){
+            jQuery(".new-row").hide();
+            jQuery(".table-container.central-table").show();
+            jQuery(".search-area").show();
+            jQuery(".table-container.central-table").removeClass("flex-part-70");
+            jQuery("#sub-table-container").hide();
+
+            var columns =  jQuery(".central-table th");
+            jQuery(".central-table td:nth-child("+columns.length+"),.central-table th:nth-child("+columns.length+") ").show();
+        }
         function getInputsValue(){
             var options = {};
             
@@ -198,7 +209,7 @@
         }*/
         
         jQuery(".add-button").click(function(){
-            showRowDetails("insert","<? echo $current["singular"]?>","<? echo isset($current["sub_table"])?>");
+            showRowEditing("insert","<? echo $current["singular"]?>","<? echo isset($current["sub_table"])?>");
             jQuery(".new-row input:not([type=hidden])").each(function (i,input){
                 jQuery(input).val("");
             })
@@ -224,40 +235,54 @@
                 sql += " where " + jQuery('input[name=id_column]').val() + " = " + jQuery(".new-row input[name='id_column']").val();
             }
             idValue = jQuery(".new-row input[name='id_column']").val();
-            ajaxfunction('run_sql', sql,{update_table:'<?=$target?>',values:[idValue]});
+            var sql_arr =[{query:sql,update_table:'<?=$target?>',values:[idValue]}];
             <?php
             if(isset($current["sub_table"])){
-                $sub_columns= array_filter($current["sub_columns"], function ($var) { return (!isset($var['primary_key'])); });
-                $columns_names =  implode(",", array_column($sub_columns, 'field') );
-                $sql= "insert into wp_y1_{$current["sub_table"]} ({$columns_names}) select ";
-                //$sql="select ";
-                $join_column= array_filter($sub_columns, function ($var) { return (isset($var['join_table'])); });
-                $join_column =reset($join_column);
-                //error_log ('joim column '.json_encode ( $join_column));
-                $continue_sql = ",{$join_column['join_key']},100 from wp_y1_{$join_column['join_table']} join wp_y1_{$current["join_to_insert"]["table_name"]} on wp_y1_{$join_column['join_table']}.{$join_column['join_key']} = wp_y1_{$current["join_to_insert"]["table_name"]}.{$current["join_to_insert"]["join_field"]} where {$current["join_to_insert"]["filter_field"]} = ";
-                ?>
-                whereValue = jQuery(".new-row select[name='grouping_id']").val();
-                sql = "<?= $sql?>" + idValue + "<?= $continue_sql?>" + whereValue;
-                ajaxfunction('run_sql', sql,{update_table:'<?=$target?>',sub_table_value:idValue});
+                $sub_columns= array_filter($current["sub_columns"], function ($var) { return (!isset($var['primary_key']) && !isset($var['query_field'])); });
+                $sub_columns= array_column($sub_columns, 'field');
+                $columns_names =  implode(",",$sub_columns  );
 
-                <?php
-             }
-            else{?>
-            jQuery(".new-row").hide();
-            jQuery("#sub-table-container").hide();
-            jQuery(".table-container.central-table").show();
-            jQuery(".search-area").show();
-            jQuery(".table-container.central-table").removeClass("flex-part-70");
+                $sql= "insert into wp_y1_{$current["sub_table"]} ({$columns_names}) VALUES  ";
+                //$sql="select ";
+//                $join_column= array_filter($sub_columns, function ($var) { return (isset($var['join_table'])); });
+//                $join_column =reset($join_column);
+                //error_log ('joim column '.json_encode ( $join_column));
+            //                $continue_sql = ",{$join_column['join_key']},100 from wp_y1_{$join_column['join_table']} join wp_y1_{$current["join_to_insert"]["table_name"]} on wp_y1_{$join_column['join_table']}.{$join_column['join_key']} = wp_y1_{$current["join_to_insert"]["table_name"]}.{$current["join_to_insert"]["join_field"]} where {$current["join_to_insert"]["filter_field"]} = ";
+
+                ?>
+            var values ="";
+            jQuery("#sub-table-container tbody tr").each(function (i,tr){
+                tr= jQuery(tr);
+                if(i>0) { values+=","; }
+                values+="(";
             <?php
-            }?>
+            foreach ($sub_columns as $i=>$column_name) {
+                if($i>0){?> values+=","; <?}?>
+                if(tr.find("td[name=<?=$column_name?>]").has('input').length>0){
+                    values+=tr.find("td[name=<?=$column_name?>] input").val() =='' ?  "0":tr.find("td[name=<?=$column_name?>] input").val();
+                }
+                else if (tr.find("td[name=<?=$column_name?>]").text()!= ""){
+                    values += tr.find("td[name=<?=$column_name?>]").text();
+                }
+                else{
+                    values +='[<?=$column_name?>]';
+                }
+
+                <?}?>
+                values+=")";
+            })
+                // whereValue = jQuery(".new-row select[name='grouping_id']").val();
+                sql = "<?= $sql?>" + values ;
+                //ajaxfunction('run_sql', sql,{update_table:'<?=$target?>',sub_table_value:idValue});
+                sql_arr.push({query:sql,update_table:'<?=$target?>'/*,sub_table_value:idValue*/})
+                <?php
+             }?>
+            ajaxfunction('run_sql', sql_arr);
+            hideRowEditing();
 
         });
         jQuery(".cancel-button").click(function(){
-            jQuery(".new-row").hide();
-            jQuery(".table-container.central-table").show();
-            jQuery(".search-area").show();
-            jQuery(".table-container.central-table").removeClass("flex-part-70");
-            jQuery("#sub-table-container").hide();
+            hideRowEditing();
         });
         
         jQuery(".search").on("search", function() {

@@ -11,6 +11,9 @@
 .flex-display.space-between{
     justify-content: space-between;
 }
+.flex-display.space-around{
+    justify-content: space-around;
+}
 .flex-display.column{
     flex-direction: column;
 }
@@ -141,9 +144,9 @@ table td, table th{
     border: 1px solid var(--a-global-color-lightgray);
     border-left:none;
     font-style:normal;
-      
 }
-table tbody tr:hover{
+
+table tbody tr:hover,table td input{
     background:var(--a-global-color-lightgray);
 }
 .table-container table td:last-child,.table-container table th:last-child{
@@ -152,10 +155,10 @@ table tbody tr:hover{
 .table-container table td:not(:last-child), .table-container table th:not(:last-child){
     width: 10vw;
 }
-.table-container table td:has(.action){
+.table-container table td:has(.actions){
     border-right:none;
     border-left:none;
-    width: 2vw;
+    /*width: 2vw;*/
 }
 .table-container table td.td-checkbox, .table-container table th.td-checkbox{
     width: 35px;
@@ -168,4 +171,8 @@ table tbody tr:hover{
 }
 .margin-r-50{
     margin-right: 50px;
+}
+.hidden{
+    visibility: hidden;
+    display: none;
 }

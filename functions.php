@@ -4,7 +4,8 @@
  *
  * @package Milestones
  */
- require_once dirname(__FILE__)."/global-functions.php";
+require_once dirname(__FILE__)."/global-functions.php";
+require_once dirname(__FILE__)."/helpers.php";
   require_once dirname(__FILE__)."/insertshaspages.php";
  
  function milestones_enqueue_scripts() {
@@ -83,19 +84,23 @@ add_action('wp_ajax_run_sql', 'run_sql');
 add_action('wp_ajax_nopriv_run_sql', 'run_sql');
 function run_sql()
 { 
-    //error_log('run_sql');
-    if(isset($_POST["query"])){
-        $query = $_POST["query"];
+
+    $options = $_POST["options"];
+    //error_log('run_sql '.json_encode ($options));
+    //$query =  $options[0]["query"];
+    $table_name = $options[0]["update_table"];
+    if(isset($options[0]["query"])){
+        $query = $options[0]["query"];
         $query = str_replace("\\", "", $query);
-        error_log ('insert qouery '.$query);
+        //error_log ('insert qouery '.$query);
         $results = run_query($query);
-        $id_column = get_id_column_in_page($_POST["update_table"]);
-        if(isset($_POST["update_table"])){
+        $id_column = get_id_column_in_page($table_name);
+//        if(isset($_POST["update_table"])){
             if(isset($_POST["sub_table_value"])){
                 $results =get_sub_table($_POST["update_table"],$_POST["sub_table_value"]);
                 error_log ('get_sub_table '.  $results);
             }
-            else {
+            else /*if (!str_starts_with ($query, "delete"))*/{
                 if (str_starts_with ($query, "insert")) {
                     $table_name = substr ($query, strpos ($query, "wp_y1_"),
                         strpos ($query, " (") - strpos ($query, "wp_y1_"));
@@ -103,15 +108,15 @@ function run_sql()
                     $new_row_id = run_query ($query)[0];
                 }
                 error_log ("max id " . json_encode ($new_row_id));
-                $query = get_page_query ($_POST["update_table"], $_POST["values"][0] ?: $new_row_id->new_id);
+                $query = get_page_query ($table_name, $options[0]["values"][0] ?: $new_row_id->new_id);
                 //error_log($query);
                 $results_query = run_query ($query);
                 //error_log('results_query '.json_encode ( $results_query));
-                $results = get_tr_data ($_POST["update_table"], $results_query, $id_column);
+                $results = get_tr_data ($table_name, $results_query, $id_column);
                 //$results =str_replace("</tr>","", str_replace ("<tr>","", $results));
                 //error_log('results '.json_encode ( $results));
             }
-        }
+//        }
         echo json_encode (array("html_tr"=> $results));
         die();
     }

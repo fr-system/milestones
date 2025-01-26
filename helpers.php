@@ -18,16 +18,19 @@ function get_sub_table($page_name,$parent_id_value,$filter_value_to_insert=null)
     $join ="";
     $query = "SELECT ";
     foreach($page_info["sub_columns"] as $column){
-        $query .= "wp_y1_".$page_info['sub_table'].".".$column["field"]. ", ";
         if(isset($column['join_table'])){
-            $query .=($column['no_table_name']?"":  "wp_y1_".$column['join_table']."."). $column['join_value'].", ";
-            if($column['no_table_name'])
-                $column_to_insert = $column['join_value'];
-            $join .= " LEFT JOIN wp_y1_".$column['join_table']." ON wp_y1_".$page_info['sub_table'].".".$column["field"] ." = wp_y1_" . $column['join_table'] . ".".$column['join_key'];
+            if(isset($column['query_field'])){
+                $column_to_insert = $column['query_field'] ." as ". $column['field'];
+            }
+            $query .= (isset($column['query_field'])?$column['query_field'] ." as ":  "wp_y1_".$column['join_table']."."). $column['field'].", ";
+
+            $join .= " LEFT JOIN wp_y1_".$column['join_table']." ON wp_y1_".$page_info['sub_table'].".".$column["foreign_key"] ." = wp_y1_" . $column['join_table'] . ".".$column['join_key'];
         }
-        if(!isset($column["hidden"])){
-            $result.='<th class="bold">'. $column["title"]??'' .'</th>';
+        else{
+            $query .= "wp_y1_".$page_info['sub_table'].".".$column["field"]. ", ";
         }
+            $result.='<th name="'.$column["field"].'" class="bold '.(isset($column["hidden"])? 'hidden':''). '">'. (isset($column["title"])?$column["title"]:'') .'</th>';
+        //"
     }
     $result.='<th class="bold"></th>';
     if(isset($page_info["actions"]) && is_array($page_info["actions"])) {
@@ -37,18 +40,29 @@ function get_sub_table($page_name,$parent_id_value,$filter_value_to_insert=null)
     $query = substr($query,0,-2);
 
     if(!is_null($filter_value_to_insert)){
-        error_log ("filter_value_to_insert");
-
+        //error_log ("filter_value_to_insert");
         $join_column= array_filter($page_info["sub_columns"], function ($var) { return (isset($var['join_table'])); });
         $join_column =reset($join_column);
-
-        $query = "SELECT {$column_to_insert},100 as score";
+/*        $query = "SELECT ";
+        foreach($page_info["sub_columns"] as $column){
+            $query .= "wp_y1_".$page_info['sub_table'].".".$column["field"]. ", ";
+            if(isset($column['join_table'])){
+                $query .=($column['no_table_name']?"":  "wp_y1_".$column['join_table']."."). $column['field'].", ";
+                if($column['no_table_name']){
+                    $column_to_insert = $column['field'];}
+                $join .= " LEFT JOIN wp_y1_".$column['join_table']." ON wp_y1_".$page_info['sub_table'].".".$column["foreign_key"] ." = wp_y1_" . $column['join_table'] . ".".$column['join_key'];
+            }
+            if(!isset($column["hidden"])){
+                $result.='<th class="bold">'. $column["title"]??'' .'</th>';
+            }
+        }*/
+        $query = "SELECT wp_y1_{$join_column['join_table']}.student_code as student_id,  {$column_to_insert}";
         $query .= " FROM wp_y1_{$join_column['join_table']} join wp_y1_{$page_info["join_to_insert"]["table_name"]} 
         on wp_y1_{$join_column['join_table']}.{$join_column['join_key']} = wp_y1_{$page_info["join_to_insert"]["table_name"]}.{$page_info["join_to_insert"]["join_field"]} 
         where {$page_info["join_to_insert"]["filter_field"]} = ".$filter_value_to_insert;
     }
     else {
-        error_log ("parent_id_value");
+        //error_log ("parent_id_value");
         $query .= " FROM  wp_y1_".$page_info['sub_table'];
         $query .= $join;
         $query .= " WHERE wp_y1_" . $page_info['sub_table'] . "." . $page_info['sub_table_field'] . " = " . $parent_id_value;
@@ -57,22 +71,28 @@ function get_sub_table($page_name,$parent_id_value,$filter_value_to_insert=null)
 
     //error_log("query : ".$query);
     $data  = run_query($query);
-    //error_log("data : ".json_encode ($data));
+    error_log("data : ".json_encode ($data));
     foreach($data as $row){
         $result.='<tr>';
         foreach($page_info["sub_columns"] as $column) {
-            $field =isset($column['alias'])? $column['alias'] :(isset($column['join_table']) ?  $column['join_value'] : $column["field"]);
-            $list=  isset($column['list_name'])? constant($column['list_name']):null;
+            $field = $column["field"];
+            $list = isset($column['list_name'])? constant($column['list_name']):null;
+            $column_value =  isset($column['list_name']) && isset($list[$row->$field])?$list[$row->$field]: $row->$field;
+            $result.='<td name="'.$field.'"  class="'.(isset($column["hidden"])? 'hidden':''). '">';
+                if(!is_null($filter_value_to_insert) && isset($column["input"])){
+                    $result.='<input type="number" />';
+                }
+                else {
+                    $result.=$column_value;
+                }
+                $result.='</td>';
 
-            if(!isset($column["hidden"]) ){
-                $column_value =  isset($column['list_name']) && isset($list[$row->$field])?$list[$row->$field]: $row->$field;
-                $result.='<td>'. $column_value.'</td>';
-            }
         }
-        $result.='<td></td>';
-        if(isset($page_info["actions"]) && is_array($page_info["actions"])) {
+        error_log ('result ' .$result);
+        //$result.='<td></td>';
+        if(isset($page_info["actions"]) && is_array($page_info["actions"]) && is_null($filter_value_to_insert)) {
             foreach($page_info["actions"] as $action) {
-                $result.='<td class=""><span class="action" name="'. $action .'" onclick="action_func(this)"><i class="'. $actions_icons[$action].'"></i></span></td>';
+                $result.='<td class=""><span class="actions" name="'. $action .'" onclick="action_func(this)"><i class="'. $actions_icons[$action].'"></i></span></td>';
             }
         }
         $result.='</tr>';
@@ -101,13 +121,14 @@ function get_tr_data($page_name, $data, $id_column){
             $html .='<td>'. $column_value.'</td>';
         }
     }
-    $html .='<td></td>';
+    //$html .='<td></td>';
     if(isset($page_info["actions"]) && is_array($page_info["actions"])) {
+        $html .='<td class="flex-display space-around">';
         foreach($page_info["actions"] as $action) {
-            $html .='<td class=""><button  class="action bg-lightblue" name="'.$action.'" onclick="action_func(this)">
-               
-                 <i class="'. $actions_icons[$action].'"></i><span>פעולה</span></button></td>';
+            $html .='<button  class="action bg-lightblue" name="'.$action.'" onclick="action_func(this)">               
+                 <i class="'. $actions_icons[$action].'"></i><span>פעולה</span></button>';
         }
+        $html .='</td>';
     }
     $html .='</tr>';
     //error_log ("add_tr_data enf ".$html);
@@ -185,8 +206,8 @@ $sub_columns = array();
 $sub_columns[] = array("field" => "id", "type" => "number", "hidden" => true,"primary_key"=>true);
 $sub_columns[] = array("field" => "test_id", "type" => "number", "hidden" => true);
 $sub_columns[] = array("field" => "student_id", "type" => "number", "hidden" => true);
-$sub_columns[] = array("field" => "student_id", "type" => "text", "join_table" => "students", "join_key" => "student_code", "join_value" => "CONCAT(last_name , ' ' , first_name) as student_name","no_table_name"=>true, "title"=>"שם התלמיד");
-$sub_columns[] = array("field" => "score", "type" => "number", "title"=>"ציון");
+$sub_columns[] = array("field" => "student_name","query_field"=>"CONCAT(last_name , ' ' , first_name)", "type" => "text", "join_table" => "students", "join_key" => "student_code","foreign_key" => "student_id","no_table_name"=>true, "title"=>"שם התלמיד");
+$sub_columns[] = array("field" => "score", "type" => "number", "title"=>"ציון","input"=>true);
 
 $pages_in_site["tests"] = array("table_name"=>"test", "columns" => $ar,"sub_table"=>"scores","sub_table_title"=>"ציונים","sub_columns"=>$sub_columns,"sub_table_field"=>"test_id","title" => "מבחנים","singular"=>"מבחן"
 ,"actions"=>array("edit"),"join_to_insert"=>array("table_name"=>"students_groupings","join_field"=>"student_id","filter_field"=> "group_id")

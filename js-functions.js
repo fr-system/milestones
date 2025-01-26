@@ -119,13 +119,16 @@ function reload_page(data){
         window.location.href = data.redirect;
 }
 
-function ajaxfunction(action, sql,options={}){
-    var values= options.values || null;
-    var data = { action: action,query: sql,
-        update_table:options.update_table ,values:values,sub_table_value:options.sub_table_value};
+function ajaxfunction(action,  options){
+
+    var sql = options[0].query;
+    var values = options[0].values;
+    // var values= options.values || null;
+    // var data = { action: action,query: sql,
+    //     update_table:options.update_table ,values:values,sub_table_value:options.sub_table_value};
     jQuery.ajax({
             url: "/wp-admin/admin-ajax.php",
-            data: data,
+            data: { action: action,options:options},
             dataType: 'json',
             method: 'POST'
         }).done(function(result) {
@@ -183,7 +186,8 @@ function removeRows(options){
     var rows = jQuery('tr:not(:hidden) .checkbox-row:checked');
     var ids = jQuery.map(rows,function(row){ return jQuery(row).val() });
     var sql = "delete from wp_y1_" + jQuery('input[name=table_name]').val() + " where " + jQuery('input[name=id_column]').val() + " in ("+ ids.join(",") +")";
-    ajaxfunction('run_sql', sql,{values:ids});
+    var sql_arr =[{query:sql,values:ids}];
+    ajaxfunction('run_sql', sql_arr);
     close_slider_message();
 }
 
