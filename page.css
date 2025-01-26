@@ -16,8 +16,13 @@
 
 
 
-.action{
-    font-size: 24px;
+.action i{
+    font-size: 20px;
+    margin:5px
+}
+.action span{
+    vertical-align: middle;
+    margin:3px
 }
 .page-header span{
     min-width: max-content;

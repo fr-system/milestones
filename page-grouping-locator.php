@@ -2,10 +2,10 @@
 
 <? $time_arr = array("בוקר","אחה\"צ"); ?>
 <?php get_header();  ?>
-<div id="primary" class="content-area">
-   
+<!--<div id="primary" class="content-area">-->
+<!--   -->
     <main id="main" class="site-main" role="main">
-        
+        <? milestones_header() ?>
       <section class="grouping-locator">
       <div class="grid-container col-4" >
         <div class="staff">
@@ -119,11 +119,9 @@
             </table>
                 
         </div>
-      </div>
+<!--      </div>-->
       <script type="text/javascript">
-		   var viewModel = kendo.observable({
 
-        });
 	    (function(){
 	        jQuery("select").change(function(){
 	            //var filter ="[data-stage="+this.value+"]";

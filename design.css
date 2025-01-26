@@ -74,9 +74,9 @@ button.border-darkblue:focus {
     background-color: var(--a-global-color-darkblue);
     color: white;
 }
-button.background-azure:focus {
+button.background-azure:focus, button.bg-lightblue{
     background-color: var(--a-global-color-lightblue);
-    color:var(--a-global-color-azure);;
+    color:var(--a-global-color-azure);
 }
 button.background-darkblue:focus {
     background-color: white;

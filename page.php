@@ -122,7 +122,7 @@
                 var message = "האם למחוק את השורה שבחרת?";
                 show_slider_message("aaa",message,"removeRows");
             }
-            else if(action == "update"){
+            else if(action == "update" || action == "edit"){
                 showRowDetails("update","<? echo $current["singular"]?>","<? echo isset($current["sub_table"])?>");
                 jQuery(".new-row input[name=id_column]").val(row.find("td.td-checkbox input").val());
                 var inputs = jQuery(".new-row input:not([type=hidden]) , .new-row select");
@@ -167,7 +167,7 @@
             if(action == "insert"){
                 var text1="נא להכניס פרטי ";
             }
-            else if(action == "update"){
+            else if(action == "update" || action == "edit"){
                 var text1="נא לעדכן פרטי ";
             }
             jQuery(".new-row .explanation").text(text1 + singular + " " + text2);
@@ -213,7 +213,7 @@
             if(action == "insert"){
                 var sql = "insert into wp_y1_" + options.tableName + " (" + options.columns.join(",") + ") values(" + options.values.join(",") + ")";
             }
-            else if(action == "update"){
+            else if(action == "update" || action == "edit"){
                 var sql = "update wp_y1_" + options.tableName + " set " ;
                 for(var i = 0; i < options.columns.length; i++){
                     if(i > 0){
