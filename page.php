@@ -100,9 +100,9 @@
             </div>
             <?if(isset($current["sub_table"])){?>
                 <div class="table-container margin-r-50" id="sub-table-container">
-                    <h3 class="darkblue font-20 bold text-center"><?echo $current['sub_table_title']?></h3>
-                <input type="hidden" name="table_name" value="<?echo $current["sub_table"]?>"/>
-                <? $sub_id_column = array_filter($current["sub_columns"], function ($var) {
+                    <h3 class="darkblue font-20 bold text-center"><?echo $current["sub_table"]['title']?></h3>
+                <input type="hidden" name="table_name" value="<?echo $current["sub_table"]["table_name"]?>"/>
+                <? $sub_id_column = array_filter($current["sub_table"]["columns"], function ($var) {
                     return (isset($var['primary_key']));
                 });
                 $sub_id_column = $sub_id_column[0]["field"];
@@ -143,11 +143,17 @@
                         jQuery(input).val(text);
                     }
                 }
-                if("<? echo (isset($current["sub_table"]) ? $current["sub_table"] : "") ?>" == "scores"){
+                if("<? echo (isset($current["sub_table"]) ? $current["sub_table"]["table_name"] : "") ?>" == "scores"){
                     get_sub_table_checked_row();
                 }
             }
-            
+            else if(action == "new-score"){
+                var td =jQuery(e).parent();
+                td.addClass("flex-display space-around");
+                td.find(".actions").hide();
+                td.append("<input type='number' name='new-score' placeholder='עדכן <?=(isset($current["sub_table"])? $current["sub_table"]["singular"]:'') ?>' style='width: 50%'><button onclick='newScore(this)' class='save'>שמור</button>");
+
+            }
         }
         
         function showRowEditing(action,singular,subTable){
@@ -181,13 +187,11 @@
             jQuery(".search-area").show();
             jQuery(".table-container.central-table").removeClass("flex-part-70");
             jQuery("#sub-table-container").hide();
-
             var columns =  jQuery(".central-table th");
             jQuery(".central-table td:nth-child("+columns.length+"),.central-table th:nth-child("+columns.length+") ").show();
         }
         function getInputsValue(){
             var options = {};
-            
             var inputs = jQuery(".new-row input:not([type=hidden]) ,.new-row select");
             options.values =jQuery.map(inputs,function(row){return "'" + jQuery(row).val() + "'" });
             <? $columns = array_filter($current["columns"], function ($var) { return (!isset($var['primary_key'])); });?>
@@ -196,18 +200,7 @@
             options.tableName ="<?echo $current['table_name']?>";
             return options;
         }
-        
-      /*  function addNewRowToTable(){
-            var inputs = jQuery(".new-row input:not([type=hidden]) ,.new-row select");
-            values =jQuery.map(inputs,function(row){return jQuery(row).val() });
-            var newRow= '<tr> <td data-id="checkbox" class="td-checkbox"><input type="checkbox" class="checkbox-row" value="<?//echo $row->$id_column?>" id=""/></td>'
-            jQuery.each(values,function(key,column_value){
-                newRow += '<td>' + column_value+'</td>'
-            });
-            newRow += '<td></td></tr>'
-            jQuery("tbody").append(newRow)
-        }*/
-        
+
         jQuery(".add-button").click(function(){
             showRowEditing("insert","<? echo $current["singular"]?>","<? echo isset($current["sub_table"])?>");
             jQuery(".new-row input:not([type=hidden])").each(function (i,input){
@@ -238,20 +231,13 @@
             var sql_arr =[{query:sql,update_table:'<?=$target?>',values:[idValue]}];
             <?php
             if(isset($current["sub_table"])){
-                $sub_columns= array_filter($current["sub_columns"], function ($var) { return (!isset($var['primary_key']) && !isset($var['query_field'])); });
+                $sub_columns= array_filter($current["sub_table"]["columns"], function ($var) { return (!isset($var['primary_key']) && !isset($var['query_field'])); });
                 $sub_columns= array_column($sub_columns, 'field');
-                $columns_names =  implode(",",$sub_columns  );
-
-                $sql= "insert into wp_y1_{$current["sub_table"]} ({$columns_names}) VALUES  ";
-                //$sql="select ";
-//                $join_column= array_filter($sub_columns, function ($var) { return (isset($var['join_table'])); });
-//                $join_column =reset($join_column);
-                //error_log ('joim column '.json_encode ( $join_column));
-            //                $continue_sql = ",{$join_column['join_key']},100 from wp_y1_{$join_column['join_table']} join wp_y1_{$current["join_to_insert"]["table_name"]} on wp_y1_{$join_column['join_table']}.{$join_column['join_key']} = wp_y1_{$current["join_to_insert"]["table_name"]}.{$current["join_to_insert"]["join_field"]} where {$current["join_to_insert"]["filter_field"]} = ";
-
+                $columns_names = implode(",",$sub_columns  );
+                $sql= "insert into wp_y1_{$current["sub_table"]["table_name"]} ({$columns_names}) VALUES  ";
                 ?>
             var values ="";
-            jQuery("#sub-table-container tbody tr").each(function (i,tr){
+            jQuery("#sub-table-container tbody tr.dirty").each(function (i,tr){
                 tr= jQuery(tr);
                 if(i>0) { values+=","; }
                 values+="(";
@@ -265,22 +251,36 @@
                     values += tr.find("td[name=<?=$column_name?>]").text();
                 }
                 else{
-                    values +='[<?=$column_name?>]';
+                    values +="<?= $column_name == $current["sub_table"]["field"]? "[id]":"null" ;  ?>";
                 }
-
                 <?}?>
                 values+=")";
             })
-                // whereValue = jQuery(".new-row select[name='grouping_id']").val();
-                sql = "<?= $sql?>" + values ;
-                //ajaxfunction('run_sql', sql,{update_table:'<?=$target?>',sub_table_value:idValue});
-                sql_arr.push({query:sql,update_table:'<?=$target?>'/*,sub_table_value:idValue*/})
+            if(values!='') {
+                sql = "<?= $sql?>" + values;
+                sql_arr.push({query: sql})
+            }
                 <?php
              }?>
             ajaxfunction('run_sql', sql_arr);
             hideRowEditing();
-
         });
+        function newScore(button) {
+            var tr = jQuery(button).parent().parent();
+            var td = jQuery(button).parent();
+            if (td.find("input[name=new-score]").val() != '') {
+                var sql = "update wp_y1_scores set old = 1 where test_id = " + tr.find("td[name=test_id]").text() + " and student_id = " + tr.find("td[name=student_id]").text();
+                var sql_arr =[{query:sql}];
+                sql = "insert into wp_y1_scores (test_id,student_id,score) " +
+                    "values(" + tr.find("td[name=test_id]").text() + "," + tr.find("td[name=student_id]").text() + "," + tr.find("td input[name=new-score]").val() + ")"
+                sql_arr.push({query:sql});
+                ajaxfunction('run_sql', sql_arr);
+                tr.find("td[name=score]").text(td.find("input[name=new-score]").val());
+            }
+            td.find(".actions").show();
+            td.removeClass("space-around");
+            td.find("input,button.save").remove();
+        }
         jQuery(".cancel-button").click(function(){
             hideRowEditing();
         });
@@ -312,24 +312,8 @@
             /*TODO filter by*/
         });
 
-
-        function fillStudentsToTest(a){
-            var b =jQuery(a);
-            var v =b.val();
-            get_sub_table_checked_row(v);
-            <?php
-          /*  $sub_columns= array_filter($current["sub_columns"], function ($var) { return (!isset($var['primary_key'])); });
-            $columns_names =  implode(",", array_column($sub_columns, 'field') );
-            //$sql= "insert into wp_y1_{$current["sub_table"]} ({$columns_names}) select ";
-            $sql="select ";
-            $join_column= array_filter($sub_columns, function ($var) { return (isset($var['join_table'])); });
-            $join_column =reset($join_column);
-            //error_log ('joim column '.json_encode ( $join_column));
-            $continue_sql = ",{$join_column['join_key']},100 from wp_y1_{$join_column['join_table']} join wp_y1_{$current["join_to_insert"]["table_name"]} on wp_y1_{$join_column['join_table']}.{$join_column['join_key']} = wp_y1_{$current["join_to_insert"]["table_name"]}.{$current["join_to_insert"]["join_field"]} where {$current["join_to_insert"]["filter_field"]} = ";
-                */?>/*
-            whereValue = jQuery(".new-row select[name='grouping_id']").val();
-            sql = "<?php /*= $sql*/?>" + idValue + "<?php /*= $continue_sql*/?>" + whereValue;
-            ajaxfunction('run_sql', sql,{update_table:'<?php /*=$target*/?>',sub_table_value:idValue});*/
+        function fillStudentsToTest(selectedValue){
+            get_sub_table_checked_row(jQuery(selectedValue).val());
         }
 	</script>
   </section>

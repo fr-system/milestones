@@ -55,4 +55,9 @@ function slider_message(){//<i class="fa-solid fa-circle-exclamation orange" sty
     </div>
     <?
 }
+
+function translate_year($year_number){
+
+}
+
 ?>

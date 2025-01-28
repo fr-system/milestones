@@ -17,23 +17,23 @@ function get_sub_table($page_name,$parent_id_value,$filter_value_to_insert=null)
 
     $join ="";
     $query = "SELECT ";
-    foreach($page_info["sub_columns"] as $column){
+    foreach($page_info["sub_table"]["columns"] as $column){
         if(isset($column['join_table'])){
             if(isset($column['query_field'])){
                 $column_to_insert = $column['query_field'] ." as ". $column['field'];
             }
             $query .= (isset($column['query_field'])?$column['query_field'] ." as ":  "wp_y1_".$column['join_table']."."). $column['field'].", ";
 
-            $join .= " LEFT JOIN wp_y1_".$column['join_table']." ON wp_y1_".$page_info['sub_table'].".".$column["foreign_key"] ." = wp_y1_" . $column['join_table'] . ".".$column['join_key'];
+            $join .= " LEFT JOIN wp_y1_".$column['join_table']." ON wp_y1_".$page_info["sub_table"]["table_name"].".".$column["foreign_key"] ." = wp_y1_" . $column['join_table'] . ".".$column['join_key'];
         }
         else{
-            $query .= "wp_y1_".$page_info['sub_table'].".".$column["field"]. ", ";
+            $query .= "wp_y1_".$page_info["sub_table"]["table_name"].".".$column["field"]. ", ";
         }
             $result.='<th name="'.$column["field"].'" class="bold '.(isset($column["hidden"])? 'hidden':''). '">'. (isset($column["title"])?$column["title"]:'') .'</th>';
         //"
     }
     $result.='<th class="bold"></th>';
-    if(isset($page_info["actions"]) && is_array($page_info["actions"])) {
+    if(isset($page_info["sub_table"]["actions"]) && is_array($page_info["sub_table"]["actions"])) {
         $result.='<th class="bold"></th>';
     }
     $result.='</tr></thead>';
@@ -41,43 +41,32 @@ function get_sub_table($page_name,$parent_id_value,$filter_value_to_insert=null)
 
     if(!is_null($filter_value_to_insert)){
         //error_log ("filter_value_to_insert");
-        $join_column= array_filter($page_info["sub_columns"], function ($var) { return (isset($var['join_table'])); });
+        $join_column= array_filter($page_info["sub_table"]["columns"], function ($var) { return (isset($var['join_table'])); });
         $join_column =reset($join_column);
-/*        $query = "SELECT ";
-        foreach($page_info["sub_columns"] as $column){
-            $query .= "wp_y1_".$page_info['sub_table'].".".$column["field"]. ", ";
-            if(isset($column['join_table'])){
-                $query .=($column['no_table_name']?"":  "wp_y1_".$column['join_table']."."). $column['field'].", ";
-                if($column['no_table_name']){
-                    $column_to_insert = $column['field'];}
-                $join .= " LEFT JOIN wp_y1_".$column['join_table']." ON wp_y1_".$page_info['sub_table'].".".$column["foreign_key"] ." = wp_y1_" . $column['join_table'] . ".".$column['join_key'];
-            }
-            if(!isset($column["hidden"])){
-                $result.='<th class="bold">'. $column["title"]??'' .'</th>';
-            }
-        }*/
-        $query = "SELECT wp_y1_{$join_column['join_table']}.student_code as student_id,  {$column_to_insert}";
-        $query .= " FROM wp_y1_{$join_column['join_table']} join wp_y1_{$page_info["join_to_insert"]["table_name"]} 
-        on wp_y1_{$join_column['join_table']}.{$join_column['join_key']} = wp_y1_{$page_info["join_to_insert"]["table_name"]}.{$page_info["join_to_insert"]["join_field"]} 
-        where {$page_info["join_to_insert"]["filter_field"]} = ".$filter_value_to_insert;
+        $query = "SELECT {$parent_id_value} as test_id, wp_y1_{$join_column['join_table']}.student_code as student_id,  {$column_to_insert}";
+        $query .= " FROM wp_y1_{$join_column['join_table']} join wp_y1_{$page_info["sub_table"]["join_to_insert"]["table_name"]} 
+        on wp_y1_{$join_column['join_table']}.{$join_column['join_key']} = wp_y1_{$page_info["sub_table"]["join_to_insert"]["table_name"]}.{$page_info["sub_table"]["join_to_insert"]["join_field"]} 
+        where {$page_info["sub_table"]["join_to_insert"]["filter_field"]} = ".$filter_value_to_insert;
+        error_log ("sql ".$query);
     }
     else {
         //error_log ("parent_id_value");
-        $query .= " FROM  wp_y1_".$page_info['sub_table'];
+        $query .= " FROM  wp_y1_".$page_info['sub_table']["table_name"];
         $query .= $join;
-        $query .= " WHERE wp_y1_" . $page_info['sub_table'] . "." . $page_info['sub_table_field'] . " = " . $parent_id_value;
+
+        $query .= " WHERE wp_y1_" . $page_info['sub_table']["table_name"] . "." . $page_info['sub_table']['field'] . " = " . $parent_id_value;
+        if(isset($page_info["sub_table"]["filter"])){
+            $query .= " AND " .$page_info["sub_table"]["filter"];
+        }
     }
-
-
     //error_log("query : ".$query);
     $data  = run_query($query);
-    error_log("data : ".json_encode ($data));
     foreach($data as $row){
-        $result.='<tr>';
-        foreach($page_info["sub_columns"] as $column) {
+        $result.='<tr class="'.(is_null($filter_value_to_insert)?'':'dirty').'">';
+        foreach($page_info['sub_table']["columns"] as $column) {
             $field = $column["field"];
             $list = isset($column['list_name'])? constant($column['list_name']):null;
-            $column_value =  isset($column['list_name']) && isset($list[$row->$field])?$list[$row->$field]: $row->$field;
+            $column_value = isset($column['list_name']) && isset($list[$row->$field])?$list[$row->$field]:(isset($row->$field)? $row->$field:'');
             $result.='<td name="'.$field.'"  class="'.(isset($column["hidden"])? 'hidden':''). '">';
                 if(!is_null($filter_value_to_insert) && isset($column["input"])){
                     $result.='<input type="number" />';
@@ -86,12 +75,9 @@ function get_sub_table($page_name,$parent_id_value,$filter_value_to_insert=null)
                     $result.=$column_value;
                 }
                 $result.='</td>';
-
         }
-        error_log ('result ' .$result);
-        //$result.='<td></td>';
-        if(isset($page_info["actions"]) && is_array($page_info["actions"]) && is_null($filter_value_to_insert)) {
-            foreach($page_info["actions"] as $action) {
+        if(isset($page_info['sub_table']["actions"]) && is_array($page_info['sub_table']["actions"]) && is_null($filter_value_to_insert)) {
+            foreach($page_info['sub_table']["actions"] as $action) {
                 $result.='<td class=""><span class="actions" name="'. $action .'" onclick="action_func(this)"><i class="'. $actions_icons[$action].'"></i></span></td>';
             }
         }
@@ -208,9 +194,17 @@ $sub_columns[] = array("field" => "test_id", "type" => "number", "hidden" => tru
 $sub_columns[] = array("field" => "student_id", "type" => "number", "hidden" => true);
 $sub_columns[] = array("field" => "student_name","query_field"=>"CONCAT(last_name , ' ' , first_name)", "type" => "text", "join_table" => "students", "join_key" => "student_code","foreign_key" => "student_id","no_table_name"=>true, "title"=>"שם התלמיד");
 $sub_columns[] = array("field" => "score", "type" => "number", "title"=>"ציון","input"=>true);
+$sub_columns[] = array("field" => "old", "type" => "number","query_field"=>"(select score from wp_y1_scores where )", "title"=>"ציון קודם");
+/*SELECT scores.*,old_scores.score as old_score FROM
+(SELECT * FROM `wp_y1_scores` WHERE `old` =0) as scores left join
+(SELECT * FROM `wp_y1_scores` WHERE `old` =1) as old_scores on old_scores.`test_id` = scores.`test_id` and old_scores.`student_id` = scores.`student_id`*/
 
-$pages_in_site["tests"] = array("table_name"=>"test", "columns" => $ar,"sub_table"=>"scores","sub_table_title"=>"ציונים","sub_columns"=>$sub_columns,"sub_table_field"=>"test_id","title" => "מבחנים","singular"=>"מבחן"
-,"actions"=>array("edit"),"join_to_insert"=>array("table_name"=>"students_groupings","join_field"=>"student_id","filter_field"=> "group_id")
+$sub_table = array("table_name"=>"scores","title"=>"ציונים","columns"=>$sub_columns,"field"=>"test_id"
+,"join_to_insert"=>array("table_name"=>"students_groupings","join_field"=>"student_id","filter_field"=> "group_id"),
+    "actions"=>array("new-score"),"singular"=>"ציון","filter"=>"old = 0");
+
+$pages_in_site["tests"] = array("table_name"=>"test", "columns" => $ar,"title" => "מבחנים","singular"=>"מבחן"
+,"actions"=>array("edit"),"sub_table"=>$sub_table
 );
 
 //$pages_in_site["tests"] = array("table_name"=>"test", "columns" => $ar,"title" => "מבחנים","singular"=>"מבחן");
@@ -226,6 +220,7 @@ define("TEST_TYPE_LIST",$test_type_list);
 $actions_icons = array();
 $actions_icons["remove"] ="fa-regular fa-trash-can";
 $actions_icons["update"] ="fa-solid fa-circle-user";
+$actions_icons["new-score"] ="fa-solid fa-circle-user";
 $actions_icons["edit"] ="fa-solid fa-pencil";
 $actions_icons["print"] ="fa-solid fa-print";
 $actions_icons["correcting-grade"] ="fa-solid fa-file-circle-check";
