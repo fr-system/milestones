@@ -150,8 +150,9 @@
             else if(action == "new-score"){
                 var td =jQuery(e).parent();
                 td.addClass("flex-display space-around");
-                td.find(".actions").hide();
-                td.append("<input type='number' name='new-score' placeholder='עדכן <?=(isset($current["sub_table"])? $current["sub_table"]["singular"]:'') ?>' style='width: 50%'><button onclick='newScore(this)' class='save'>שמור</button>");
+                td.find(".action").hide();
+                td.append('<input type="number" name="new-score" placeholder="הכנס" <?=(isset($current["sub_table"])? $current["sub_table"]["singular"]:'') ?>" style="width: 70px;margin-left: 10px;">'+
+                '<button onclick="newScore(this)" class="action save bg-darkblue"><i class="fa-solid fa-check"></i>עדכן ציון</button>');
 
             }
         }
@@ -159,10 +160,10 @@
         function showRowEditing(action,singular,subTable){
             jQuery(".new-row").show();
             var columns =  jQuery(".central-table th");
+            jQuery(".search-area").hide();
             jQuery(".central-table td:nth-child("+columns.length+"),.central-table th:nth-child("+columns.length+") ").hide();
             if(subTable){
                 jQuery("#sub-table-container").show();
-                jQuery(".search-area").hide();
                 jQuery(".table-container.central-table").hide();
                 jQuery("#sub-table-container").find("table").find("tbody").empty();
             }
@@ -277,7 +278,7 @@
                 ajaxfunction('run_sql', sql_arr);
                 tr.find("td[name=score]").text(td.find("input[name=new-score]").val());
             }
-            td.find(".actions").show();
+            td.find(".action").show();
             td.removeClass("space-around");
             td.find("input,button.save").remove();
         }

@@ -78,7 +78,7 @@ function get_sub_table($page_name,$parent_id_value,$filter_value_to_insert=null)
         }
         if(isset($page_info['sub_table']["actions"]) && is_array($page_info['sub_table']["actions"]) && is_null($filter_value_to_insert)) {
             foreach($page_info['sub_table']["actions"] as $action) {
-                $result.='<td class=""><span class="actions" name="'. $action .'" onclick="action_func(this)"><i class="'. $actions_icons[$action].'"></i></span></td>';
+                $result.='<td class=""><button class="action '.$actions_icons[$action]["bg-color"].'" name="'. $action .'" onclick="action_func(this)"><i class="'. $actions_icons[$action]["icon"].'"></i><span>'.$actions_icons[$action]["text"]." ".$page_info['sub_table']["singular"].'</span></button></td>';
             }
         }
         $result.='</tr>';
@@ -100,7 +100,7 @@ function get_tr_data($page_name, $data, $id_column){
 
         if($field != $id_column){
             if($column['type']=="action"){
-                $column_value = '<button  class="action bg-lightblue" name="'.$column['field'].'" onclick="action_func(this)"><i class="'.$actions_icons[$column['field']].'"></i><span>פעולה</span></button>';
+                $column_value = '<button  class="action '.$actions_icons[$column['field']]["bg-color"].'" name="'.$column['field'].'" onclick="action_func(this)"><i class="'.$actions_icons[$column['field']]["icon"].'"></i><span>'.$actions_icons[$column['field']]["text"]." ".$page_info["singular"].'</span></button>';
             }else{
                 $column_value = isset($column['list_name']) && isset($list[$row->$field])?$list[$row->$field]: $row->$field;
             }
@@ -109,10 +109,10 @@ function get_tr_data($page_name, $data, $id_column){
     }
     //$html .='<td></td>';
     if(isset($page_info["actions"]) && is_array($page_info["actions"])) {
-        $html .='<td class="flex-display space-around">';
+        $html .='<td class="flex-display">';
         foreach($page_info["actions"] as $action) {
-            $html .='<button  class="action bg-lightblue" name="'.$action.'" onclick="action_func(this)">               
-                 <i class="'. $actions_icons[$action].'"></i><span>פעולה</span></button>';
+            $html .='<button  class="action '.$actions_icons[$action]["bg-color"].'" name="'.$action.'" onclick="action_func(this)">               
+                 <i class="'. $actions_icons[$action]["icon"].'"></i><span>'.$actions_icons[$action]["text"]." ".$page_info["singular"].'</span></button>';
         }
         $html .='</td>';
     }
@@ -194,7 +194,7 @@ $sub_columns[] = array("field" => "test_id", "type" => "number", "hidden" => tru
 $sub_columns[] = array("field" => "student_id", "type" => "number", "hidden" => true);
 $sub_columns[] = array("field" => "student_name","query_field"=>"CONCAT(last_name , ' ' , first_name)", "type" => "text", "join_table" => "students", "join_key" => "student_code","foreign_key" => "student_id","no_table_name"=>true, "title"=>"שם התלמיד");
 $sub_columns[] = array("field" => "score", "type" => "number", "title"=>"ציון","input"=>true);
-$sub_columns[] = array("field" => "old", "type" => "number","query_field"=>"(select score from wp_y1_scores where )", "title"=>"ציון קודם");
+//$sub_columns[] = array("field" => "old", "type" => "number","query_field"=>"(select score from wp_y1_scores where )", "title"=>"ציון קודם");
 /*SELECT scores.*,old_scores.score as old_score FROM
 (SELECT * FROM `wp_y1_scores` WHERE `old` =0) as scores left join
 (SELECT * FROM `wp_y1_scores` WHERE `old` =1) as old_scores on old_scores.`test_id` = scores.`test_id` and old_scores.`student_id` = scores.`student_id`*/
@@ -218,13 +218,16 @@ $test_type_list = array(1=>'שבועי', 2 =>'חודשי');
 define("TEST_TYPE_LIST",$test_type_list);
 
 $actions_icons = array();
-$actions_icons["remove"] ="fa-regular fa-trash-can";
-$actions_icons["update"] ="fa-solid fa-circle-user";
-$actions_icons["new-score"] ="fa-solid fa-circle-user";
-$actions_icons["edit"] ="fa-solid fa-pencil";
-$actions_icons["print"] ="fa-solid fa-print";
-$actions_icons["correcting-grade"] ="fa-solid fa-file-circle-check";
-$actions_icons["correcting-grade2"] ="fa-solid fa-file-arrow-up";
-$actions_icons["correcting-grade3"] ="fa-solid fa-file-circle-exclamation";
-$actions_icons["change-grouping"] ="fa-solid fa-person-walking-arrow-loop-left";
+$actions_icons["remove"] =array("text"=>"מחיקת", "icon"=>"fa-regular fa-trash-can","bg-color"=>"bg-darkblue");
+$actions_icons["update"] =array("text"=>"עדכון", "icon"=>"fa-solid fa-circle-user","bg-color"=>"bg-lightblue");
+$actions_icons["new-score"] =array("text"=>"עדכון", "icon"=>"fa-solid fa-circle-user","bg-color"=>"bg-lightblue");
+$actions_icons["edit"] =array("text"=>"עריכת", "icon"=>"fa-solid fa-pencil","bg-color"=>"bg-lightblue");
+$actions_icons["print"] =array("text"=>"הדפסה", "icon"=>"fa-solid fa-print","bg-color"=>"bg-darkblue");
+$actions_icons["correcting-grade"] =array("text"=>"", "icon"=>"fa-solid fa-file-circle-check","bg-color"=>"bg-darkblue");
+$actions_icons["correcting-grade2"] =array("text"=>"", "icon"=>"fa-solid fa-file-arrow-up","bg-color"=>"bg-darkblue");
+$actions_icons["correcting-grade3"] =array("text"=>"", "icon"=>"fa-solid fa-file-circle-exclamation","bg-color"=>"bg-darkblue");
+$actions_icons["change-grouping"] =array("text"=>"החלפת", "icon"=>"fa-solid fa-person-walking-arrow-loop-left","bg-color"=>"bg-lightblue");
+
+$actions_icons["save"] =array("text"=>"שמור", "icon"=>"fa-solid fa-check","bg-color"=>"bg-darkblue");
+
 ?>
